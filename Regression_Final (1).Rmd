@@ -1,0 +1,977 @@
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Machine Learning Algorithms
+
+## INDEX
+#### 1.Linear regression for Prediction of Suicide count from 2013-2033
+#### 2.With respect to Causes,Year        
+#### 3.State,Year  
+#### 4.Age grp,Year             
+#### 5.Wrt State,Age grp,Year Culminated Model
+
+
+### 0)Libraries,Extraction , cleaning and separating:
+```{r,echo=TRUE}
+
+df<-read.table('C:/Personal/Aravinda Stuff/Sem 5th/DV and FDA proj/Suicides in India 2001-2012.csv',header=T, sep=",")
+#head(df)
+
+#install.packages('tidyverse')
+#install.packages('caret')
+#install.packages("plotly")
+library(tidyverse)
+library(caret)
+library(dplyr)
+library(ggplot2)
+library(plotly)
+library(glmnet)
+
+#Data Cleaning
+#Replacing Values for UT
+df["State"][df["State"] == "A & N Islands"]<-"A & N Islands-Ut"
+df["State"][df["State"] == "Chandigarh"]<-"Chandigarh-Ut"
+df["State"][df["State"] == "D & N Haveli"]<-"D & N Haveli-Ut"
+df["State"][df["State"] == "Daman & Diu"]<-"Daman & Diu-Ut"
+df["State"][df["State"] == "Lakshadweep"]<-"Lakshadweep-Ut"
+df["State"][df["State"] == "Delhi"] <-"Delhi-Ut"
+#head(df)
+#Renaming causes
+df["Type"][df["Type"]=="Bankruptcy or Sudden change in Economic"]<-"Sudden change in Economic Status or Bankruptcy"
+df["Type"][df["Type"]=="By Other means (please specify)"]<-"By Other means"
+df["Type"][df["Type"]=="Not having Children(Barrenness/Impotency"]<-"Not having Children(Impotency)"
+df["Type"][df["Type"]=="By Jumping from (Building)"]<-"By Jumping from Building"
+df["Type"][df["Type"]=="Hr. Secondary/Intermediate/Pre-Universit"]<-"Hr. Secondary/Intermediate/Pre-University"
+df["Type"][df["Type"]=="Failure in Examination"]<-"Examination Failure"
+df["Type"][df["Type"]=="By coming under running vehicles/trains"]<-"By road or railway accidents" 
+df["Type"][df["Type"]=="Bankruptcy or Sudden change in Economic Status"]<-"Sudden change in Economic Status or Bankruptcy"
+df["Type"][df["Type"]=="Not having Children (Barrenness/Impotency"]<-"Not having Children(Impotency)"
+#causescount
+#head(df)
+
+#drop the unwanted State-titles
+df1 <- df[!(df$State=="Total (Uts)" | df$State=="Total (All India)" |  df$State=="Total (States)"),]
+#drop the values ==0 under Total
+df2 <- df1[!(df1$Total==0),]
+# drop the unwanted Types
+df2 <- df2[!(df2$Type=="By Other means" | df2$Type=="Others (Please Specify)" | df2$Type=="Causes Not known" |  df2$Type=="Other Causes (Please Specity)"),]
+
+#Spliting the dataframe into smaller dataframe based on the column "Type_code"
+causesdf=filter(df2,df2$Type_code=="Causes")
+edudf=filter(df2,df2$Type_code=="Education_Status")
+meansdf=filter(df2,df2$Type_code=="Means_adopted")
+professionaldf=filter(df2,df2$Type_code=="Professional_Profile")
+socialdf=filter(df2,df2$Type_code=="Social_Status")
+
+head(df2)
+```
+
+
+
+### 1.1)Linear Regression for prediction for suicide count from 2013-2033
+```{r, echo=TRUE}
+# Extracting the needed year and suicide count columns
+suicide_count_overyears <- df2 %>% group_by(Year) %>% summarise(total_case=sum(Total))
+suicide_count_overyears
+
+#Testing co relation
+cor(suicide_count_overyears$Year,suicide_count_overyears$total_case)
+cor.test(suicide_count_overyears$Year,suicide_count_overyears$total_case)
+
+#Partitioning into train and test
+set.seed(123)
+train_samples <- suicide_count_overyears$Year %>%
+  createDataPartition(p=0.65,list=FALSE)
+#train_samples
+head(train_samples)
+train <- suicide_count_overyears[train_samples,]
+test <- suicide_count_overyears[-train_samples,]
+#train
+#test
+#suicide_count_overyears
+
+# LR Model creation
+model <- lm(total_case~Year,data=train)
+summary(model)
+
+#Make predictions
+pred <- model %>%
+  predict(test)
+
+pred
+
+#Verification with actual value and predicted values
+RMSE <- RMSE(pred,test$total_case)
+RMSE
+
+R2 <- R2(pred,test$total_case)
+R2
+
+hist(model$residuals)
+qqnorm(model$residuals,ylab = "Residuals")
+qqline(model$residuals)
+
+# Prediction
+future_years=data.frame(Year=c(2013:2033))
+future_years$total_case <- model %>%
+  predict(future_years)
+
+future_years
+
+
+# Bar plot for rise in suicide cases
+total_suicide_count <- rbind(suicide_count_overyears,future_years)
+#total
+fig <- plot_ly(
+  x = total_suicide_count$Year,
+  y = total_suicide_count$total_case,
+  name = "Variation of suicide count over the years 2013-2032",
+  type = "bar",
+
+)
+fig <- fig %>% layout(title = "Suicide Trend Over the years",
+                      barmode = 'group',
+                      xaxis = list(title = "Years"),
+                      yaxis = list(title = "Count"))
+
+fig
+```
+
+### 1.2)Logistic Regression for prediction for suicide count from 2013-2033
+```{r, echo=TRUE}
+
+# Extracting the needed year and suicide count columns
+suicide_count_overyears <- df2 %>% group_by(Year) %>% summarise(total_case=sum(Total))
+suicide_count_overyears
+
+#Testing co relation
+cor(suicide_count_overyears$Year,suicide_count_overyears$total_case)
+cor.test(suicide_count_overyears$Year,suicide_count_overyears$total_case)
+
+#Partitioning into train and test
+set.seed(123)
+train_samples <- suicide_count_overyears$Year %>%
+  createDataPartition(p=0.65,list=FALSE)
+#train_samples
+head(train_samples)
+train <- suicide_count_overyears[train_samples,]
+test <- suicide_count_overyears[-train_samples,]
+train
+test
+
+as.factor(suicide_count_overyears$Total)
+
+
+# Training model
+logistic_modelLR <- glm(total_case~Year, data = train)
+logistic_modelLR
+pred <- logistic_modelLR %>%
+  predict(test)
+pred
+
+RMSE <- RMSE(pred,test$total_case)
+RMSE
+R2 <- R2(pred,test$total_case)
+R2
+test
+```
+
+## 2)CAUSES Filtration
+
+```{r}
+
+topcauses<-causesdf%>%select(Type,Year,Total) %>% group_by(Type)%>% 
+  summarise(Total=sum(Total)) %>% arrange(desc(Total))%>% head(10)
+topcauses<-as.data.frame(topcauses)
+head(topcauses)
+
+topcauses1<-causesdf%>%select(Type,Year,Total) %>% group_by(Year,Type="Family Problems")%>%
+  summarise(Total=sum(Total)) %>% arrange(desc(Type))
+head(topcauses1)
+
+topcauses2<-causesdf%>%select(Type,Year,Total) %>% group_by(Year,Type="Other Prolonged Illness")%>%
+  summarise(Total=sum(Total)) %>% arrange(desc(Type))
+head(topcauses2)
+
+topcauses3<-causesdf%>%select(Type,Year,Total) %>% group_by(Year,Type="Insanity/Mental Illness")%>%
+  summarise(Total=sum(Total)) %>% arrange(desc(Type))
+head(topcauses3)
+
+topcauses4<-causesdf%>%select(Type,Year,Total) %>% group_by(Year,Type="Love Affairs")%>%
+  summarise(Total=sum(Total)) %>% arrange(desc(Type))
+head(topcauses4)
+
+topcauses5<-causesdf%>%select(Type,Year,Total) %>% group_by(Year,Type="Sudden change in Economic Status or Bankruptcy")%>%summarise(Total=sum(Total)) %>% arrange(desc(Type))
+head(topcauses5)
+
+
+top5causes=rbind(topcauses1,topcauses2,topcauses3,topcauses4,topcauses5)
+
+
+```
+
+## 2.1)CAUSES MLR
+
+```{r}
+set.seed(123)
+train_samples <- top5causes$Year %>%
+  createDataPartition(p=0.70,list=FALSE)
+
+train <- top5causes[train_samples,]
+test <- top5causes[-train_samples,]
+
+
+# LR Model creation
+model <- lm(Total~Year+Type,data=train)
+summary(model)
+
+#Make predictions
+pred <- model %>%
+  predict(test)
+
+pred
+
+#Verification with actual value and predicted values
+RMSE <- RMSE(pred,test$Total)
+RMSE
+
+R2 <- R2(pred,test$Total)
+R2
+
+hist(model$residuals)
+qqnorm(model$residuals,ylab = "Residuals")
+qqline(model$residuals)
+
+# Prediction
+new.speeds <- data.frame(
+  Year = c(2023, 2024, 2025) , Type = c("Family Problems","Love Affairs","Other Prolonged Illness") 
+)
+#(agedf)
+predict(model, newdata = new.speeds)
+
+
+
+future_years
+
+
+
+
+```
+
+## 2.2)Causes Lasso
+```{r}
+#Testing co relation
+#cor(suicide_count_overyears$Year,suicide_count_overyears$total_case)
+#cor.test(suicide_count_overyears$Year,suicide_count_overyears$total_case)
+
+#Partitioning into train and test
+set.seed(123)
+train_samples <- top5causes$Total %>%
+  createDataPartition(p=0.80,list=FALSE)
+
+train <- top5causes[train_samples,]
+test <- top5causes[-train_samples,]
+#agedf
+
+#install.packages("glmnet")
+
+
+#perform k-fold cross-validation to find optimal lambda value
+cv_model <- cv.glmnet(data.matrix(train[, c('Year','Type')]), train$Total, alpha = 0.5)
+cv_model
+#find optimal lambda value that minimizes test MSE
+best_lambda <- cv_model$lambda.min
+best_lambda
+
+#[1] best_lambda=546.3268
+
+#produce plot of test MSE by lambda value
+plot(cv_model)
+
+
+#Best Lasso model
+#t=data.matrix(train[, c('Year','State','Age_group')])
+#t
+best_model <- glmnet(data.matrix(train[, c('Year','Type')]), train$Total, alpha = 0.5, lambda = best_lambda)
+coef(best_model)
+
+#Prediction
+
+#define new observation
+#new = matrix(c(2015,'Maharashtra',"45-59"), nrow=1, ncol=3) 
+#data.matrix(c(2015,'Maharashtra',"45-59"))
+#new
+#use lasso regression model to predict response value
+#predict(best_model, s = best_lambda, newx = new)
+
+x=data.matrix(test[, c('Year','Type')])
+#x
+y=test$Total
+#Metrics
+y_predicted <- predict(best_model, s = best_lambda, newx = x)
+
+
+RMSE <- RMSE(y,y_predicted)
+RMSE
+
+R2 <- R2(y,y_predicted)
+R2
+
+#find SST and SSE
+#sst <- sum((y - mean(y))^2)
+#sse <- sum((y_predicted - y)^2)
+
+#find R-Squared
+#rsq <- 1-sse/sst
+#rsq
+
+```
+
+
+## 2.3)SVM for Causes
+```{r}
+library(e1071)
+set.seed(123)
+
+train_samples <- top5causes$Total %>% createDataPartition(p=0.65,list=FALSE)
+train <- top5causes[train_samples,]
+train$Type<-as.factor(train$Type)
+test <- top5causes[-train_samples,]
+test$Type<-as.factor(test$Type)
+#agedf
+
+# MLR Model creation
+causessvm <- svm(Total~Year+Type,data=train, kernel = 'linear')
+summary(causessvm)
+
+#Make predictions
+pred <- causessvm %>%predict(test)
+pred
+
+#Verification with actual value and predicted values
+RMSE <- RMSE(pred,test$Total)
+RMSE
+
+R2 <- R2(pred,test$Total)
+R2
+
+
+
+```
+
+## 2.4)Logistic Regression for Causes
+```{r}
+#Partitioning into train and test
+set.seed(123)
+train_samples <- top5causes$Total %>%
+  createDataPartition(p=0.80,list=FALSE)
+
+train <- top5causes[train_samples,]
+test <- top5causes[-train_samples,]
+
+
+as.factor(top5causes$Total)
+
+# Training model
+logistic_modelC <- glm(Total~Year+Type, data = train)
+logistic_modelC
+pred <- logistic_modelC %>%
+  predict(test)
+pred
+
+RMSE <- RMSE(pred,test$Total)
+RMSE
+R2 <- R2(pred,test$Total)
+R2
+test
+```
+
+## 3)Top 3 states filtration
+```{r,echo=TRUE}
+ 
+topstate<-df2%>%filter(!State %in% c("Total (All India)","Total (States)","Total (Uts)"))%>%select(State,Year,Total) %>% group_by(State)%>% 
+  summarise(Total=sum(Total)) %>% arrange(desc(Total))%>% head(10)
+topstate<-as.data.frame(topstate)
+topstate
+
+topstate1<-df2%>%filter(!State %in% c("Total (All India)","Total (States)","Total (Uts)"))%>%
+  select(State,Year,Total) %>% group_by(Year,State="Maharashtra")%>%
+  summarise(Total=sum(Total)) %>% arrange(desc(State))
+topstate2<-df2%>%filter(!State %in% c("Total (All India)","Total (States)","Total (Uts)"))%>%
+  select(State,Year,Total) %>% group_by(Year,State="West Bengal")%>%
+  summarise(Total=sum(Total)) %>% arrange(desc(State))
+topstate3<-df2%>%filter(!State %in% c("Total (All India)","Total (States)","Total (Uts)"))%>%
+  select(State,Year,Total) %>% group_by(Year,State="Andhra Pradesh")%>%
+  summarise(Total=sum(Total)) %>% arrange(desc(State))
+
+top3state=rbind(topstate1,topstate2,topstate3)
+#View(top3state)
+```
+
+## 3.1)TOP 3 STATES MLR
+```{r}
+
+# Extracting the needed year and suicide count columns
+
+#Testing co relation
+#cor(suicide_count_overyears$Year,suicide_count_overyears$total_case)
+#cor.test(suicide_count_overyears$Year,suicide_count_overyears$total_case)
+
+#Partitioning into train and test
+set.seed(123)
+train_samples <- top3state$Year %>% createDataPartition(p=0.80,list=FALSE)
+train <- top3state[train_samples,]
+test <- top3state[-train_samples,]
+
+
+# LR Model creation
+model <- lm(Total~Year+State,data=train)
+summary(model)
+
+#Make predictions
+pred <- model %>%
+  predict(test)
+
+pred
+
+#Verification with actual value and predicted values
+RMSE <- RMSE(pred,test$Total)
+RMSE
+
+R2 <- R2(pred,test$Total)
+R2
+
+hist(model$residuals)
+qqnorm(model$residuals,ylab = "Residuals")
+qqline(model$residuals)
+
+# Prediction
+new.speeds <- data.frame(
+  Year = c(2013, 2014, 2025) , State = c("Maharashtra","West Bengal","Maharashtra"))
+#(agedf)
+predict(model, newdata = new.speeds)
+
+#future_years=data.frame(Year=c(2013:2033))
+#future_years$total_case <- model %>%
+#  predict(future_years)
+
+
+
+
+
+```
+
+## 3.2)Lasso for top 3 states
+
+```{r, echo=TRUE}
+#install.packages("glmnet")
+library(glmnet)
+
+#perform k-fold cross-validation to find optimal lambda value
+cv_model <- cv.glmnet(data.matrix(top3state[, c('Year','State')]), top3state$Total, alpha = 1)
+cv_model
+#find optimal lambda value that minimizes test MSE
+best_lambda <- cv_model$lambda.min
+best_lambda
+
+#[1] best_lambda=1123.63
+
+#produce plot of test MSE by lambda value
+plot(cv_model)
+
+
+#Best Lasso model
+best_model <- glmnet(data.matrix(top3state[, c('Year','State')]), top3state$Total, alpha = 1, lambda = best_lambda)
+coef(best_model)
+
+#Prediction
+
+#define new observation
+#new = matrix(c(2005,'Maharashtra'), nrow=1, ncol=2) 
+#new
+#use lasso regression model to predict response value
+#predict(best_model, s = best_lambda, newx = new)
+
+x=data.matrix(top3state[, c('Year','State')])
+y=top3state$Total
+#Metrics
+y_predicted <- predict(best_model, s = best_lambda, newx = x)
+
+#find SST and SSE
+sst <- sum((y - mean(y))^2)
+sse <- sum((y_predicted - y)^2)
+
+#find R-Squared
+rsq <- 1 - sse/sst
+rsq
+```
+
+
+## 3.3)SVM for top 3 states
+```{r}
+top3state
+library(e1071)
+set.seed(123)
+
+train_samples <- top3state$Total %>% createDataPartition(p=0.80,list=FALSE)
+train <- top3state[train_samples,]
+test <- top3state[-train_samples,]
+
+#agedf
+
+# MLR Model creation
+statemodelsvm <- svm(Total~State,data=train, kernel = 'linear')
+summary(statemodelsvm)
+
+#Make predictions
+pred <- statemodelsvm %>%predict(test)
+pred
+
+#Verification with actual value and predicted values
+RMSE <- RMSE(pred,test$Total)
+RMSE
+
+R2 <- R2(pred,test$Total)
+R2
+
+
+
+
+```
+
+## 3.4)Logistic Regression for top 3 states
+```{r, echo=TRUE}
+# Splitting dataset
+set.seed(123)
+train_samples <- top3state$Year %>% createDataPartition(p=0.65,list=FALSE)
+#train_samples
+head(train_samples)
+train <- top3state[train_samples,]
+test <- top3state[-train_samples,]
+train
+test
+
+as.factor(top3state$Total)
+
+# Training model
+logistic_model <- glm(Total~Year+State, data = train)
+logistic_model 
+pred <- logistic_model %>%
+  predict(test)
+pred
+
+RMSE <- RMSE(pred,test$Total)
+RMSE
+R2 <- R2(pred,test$Total)
+R2
+test
+```
+
+## 4)WRT AGE GRP Filtration
+```{r}
+agedf<-df2%>% select(Year,Age_group,Total)%>% 
+  filter(!Age_group=="0-100")%>% 
+  filter(!Age_group=="0-100+")%>%
+  group_by(Year,Age_group)%>% 
+  summarise(Total=sum(Total))%>% arrange(desc(Age_group))
+agedf<-as.data.frame(agedf)
+```
+
+## 4.1)AGE GROUP MLR
+```{r}
+
+# Extracting the needed year and suicide count columns
+
+#Testing co relation
+#cor(suicide_count_overyears$Year,suicide_count_overyears$total_case)
+#cor.test(suicide_count_overyears$Year,suicide_count_overyears$total_case)
+
+#Partitioning into train and test
+set.seed(123)
+train_samples <- agedf$Year %>% createDataPartition(p=0.65,list=FALSE)
+train <- agedf[train_samples,]
+test <- agedf[-train_samples,]
+
+
+# LR Model creation
+model <- lm(Total~Year+Age_group,data=train)
+summary(model)
+
+#Make predictions
+pred <- model %>%
+  predict(test)
+
+pred
+
+#Verification with actual value and predicted values
+RMSE <- RMSE(pred,test$Total)
+RMSE
+
+R2 <- R2(pred,test$Total)
+R2
+
+hist(model$residuals)
+qqnorm(model$residuals,ylab = "Residuals")
+qqline(model$residuals)
+
+# Prediction
+new.speeds <- data.frame(
+  Year = c(2013, 2013, 2013) , Age_group = c("30-44","45-59","0-14"))
+#(agedf)
+predict(model, newdata = new.speeds)
+
+#future_years=data.frame(Year=c(2013:2033))
+#future_years$total_case <- model %>%
+#  predict(future_years)
+
+
+
+
+
+```
+
+## 4.2)SVM Model for Age wrt Total
+
+```{r}
+library(e1071)
+set.seed(123)
+
+train_samples <- agedf$Total %>% createDataPartition(p=0.80,list=FALSE)
+train <- agedf[train_samples,]
+test <- agedf[-train_samples,]
+
+#agedf
+
+# MLR Model creation
+modelsvm1 <- svm(Total~Year+Age_group,data=train, kernel = 'linear')
+summary(modelsvm1)
+
+#Make predictions
+pred <- modelsvm1 %>%predict(test)
+pred
+
+#Verification with actual value and predicted values
+RMSE <- RMSE(pred,test$Total)
+RMSE
+
+R2 <- R2(pred,test$Total)
+R2
+
+#find SST and SSE
+sst <- sum((y - mean(y))^2)
+sse <- sum((y_predicted - y)^2)
+
+#find R-Squared
+rsq <- 1-sse/sst
+rsq
+
+
+```
+
+
+## 4.3)Lasso for age grp
+
+```{r, echo=TRUE}
+#install.packages("glmnet")
+library(glmnet)
+
+#Partitioning into train and test
+set.seed(123)
+train_samples <- agedf$Total %>%
+  createDataPartition(p=0.80,list=FALSE)
+train <- agedf[train_samples,]
+test <- agedf[-train_samples,]
+
+#agedf
+
+#install.packages("glmnet")
+#library(glmnet)
+
+#perform k-fold cross-validation to find optimal lambda value
+cv_model <- cv.glmnet(data.matrix(train[, c('Year','Age_group')]), train$Total, alpha = 0.5)
+cv_model
+#find optimal lambda value that minimizes test MSE
+best_lambda <- cv_model$lambda.min
+best_lambda
+
+#[1] best_lambda=2565.932
+
+#produce plot of test MSE by lambda value
+plot(cv_model)
+
+
+#Best Lasso model
+#t=data.matrix(train[, c('Year','State','Age_group')])
+#t
+best_model <- glmnet(data.matrix(train[, c('Year','Age_group')]), train$Total, alpha = 0.5, lambda = best_lambda)
+coef(best_model)
+
+#Prediction
+
+#define new observation
+#new = matrix(c(2015,'Maharashtra',"45-59"), nrow=1, ncol=3) 
+#data.matrix(c(2015,'Maharashtra',"45-59"))
+#new
+#use lasso regression model to predict response value
+#predict(best_model, s = best_lambda, newx = new)
+
+x=data.matrix(test[, c('Year','Age_group')])
+#x
+y=test$Total
+#Metrics
+y_predicted <- predict(best_model, s = best_lambda, newx = x)
+
+
+RMSE <- RMSE(y,y_predicted)
+RMSE
+
+R2 <- R2(y,y_predicted)
+R2
+
+#find SST and SSE
+#sst <- sum((y - mean(y))^2)
+#sse <- sum((y_predicted - y)^2)
+
+#find R-Squared
+#rsq <- 1-sse/sst
+#rsq
+```
+## 4.4)Logistic Regression for age grp
+
+```{r, echo=TRUE}
+#Partitioning into train and test
+set.seed(123)
+train_samples <- agedf$Year %>% createDataPartition(p=0.65,list=FALSE)
+train <- agedf[train_samples,]
+test <- agedf[-train_samples,]
+train
+test
+
+as.factor(agedf$Total)
+
+# Training model
+logistic_modelAG <- glm(Total~Year+Age_group, data = train)
+logistic_modelAG
+pred <- logistic_modelAG %>%
+  predict(test)
+pred
+
+RMSE <- RMSE(pred,test$Total)
+RMSE
+R2 <- R2(pred,test$Total)
+R2
+test
+```
+
+## 5)Wrt State,Age grp,Year Culminated Model Filtration
+```{r}
+####
+# Extracting the needed year and suicide count columns
+topstate1<-df2%>%filter(!State %in% c("Total (All India)","Total (States)","Total (Uts)"))%>%
+  select(State,Year,Age_group,Total) %>%
+  filter(!Age_group=="0-100")%>% 
+  filter(!Age_group=="0-100+")%>%
+  group_by(Year,Age_group,State="Maharashtra")%>%
+  summarise(Total=sum(Total)) %>% arrange(desc(State))
+
+topstate2<-df2%>%filter(!State %in% c("Total (All India)","Total (States)","Total (Uts)"))%>%
+  select(State,Year,Age_group,Total) %>%
+  filter(!Age_group=="0-100")%>% 
+  filter(!Age_group=="0-100+")%>%
+  group_by(Year,Age_group,State="West Bengal")%>%
+  summarise(Total=sum(Total)) %>% arrange(desc(State))
+
+topstate3<-df2%>%filter(!State %in% c("Total (All India)","Total (States)","Total (Uts)"))%>%
+  select(State,Year,Age_group,Total) %>%
+  filter(!Age_group=="0-100")%>% 
+  filter(!Age_group=="0-100+")%>%
+  group_by(Year,Age_group,State="Andhra Pradesh")%>%
+  summarise(Total=sum(Total)) %>% arrange(desc(State))
+#topstate3
+model=rbind(topstate1,topstate2,topstate3)
+modellasso=rbind(topstate1,topstate2,topstate3)
+modelsvm=rbind(topstate1,topstate2,topstate3)
+modelLog=rbind(topstate1,topstate2,topstate3)
+
+```
+
+
+
+
+## 5.1)Wrt State,Age grp,Year Culminated Model Lasso
+```{r}
+#Testing co relation
+#cor(suicide_count_overyears$Year,suicide_count_overyears$total_case)
+#cor.test(suicide_count_overyears$Year,suicide_count_overyears$total_case)
+
+#Partitioning into train and test
+set.seed(123)
+train_samples <- modellasso$Total %>%
+  createDataPartition(p=0.80,list=FALSE)
+train <- modellasso[train_samples,]
+test <- modellasso[-train_samples,]
+#agedf
+
+#install.packages("glmnet")
+library(glmnet)
+
+#perform k-fold cross-validation to find optimal lambda value
+cv_model <- cv.glmnet(data.matrix(train[, c('Year','State','Age_group')]), train$Total, alpha = 0)
+cv_model
+#find optimal lambda value that minimizes test MSE
+best_lambda <- cv_model$lambda.min
+
+
+best_lambda
+
+#[1] best_lambda=2565.932
+
+#produce plot of test MSE by lambda value
+plot(cv_model)
+
+
+#Best Lasso model
+#t=data.matrix(train[, c('Year','State','Age_group')])
+#t
+best_model <- glmnet(data.matrix(train[, c('Year','State','Age_group')]), train$Total, alpha = 0, lambda = best_lambda)
+coef(best_model)
+
+#Prediction
+
+#define new observation
+#new = matrix(c(2015,'Maharashtra',"45-59"), nrow=1, ncol=3) 
+#data.matrix(c(2015,'Maharashtra',"45-59"))
+#new
+#use lasso regression model to predict response value
+#predict(best_model, s = best_lambda, newx = new)
+
+x=data.matrix(test[, c('Year','State','Age_group')])
+#x
+y=test$Total
+#Metrics
+y_predicted <- predict(best_model, s = best_lambda, newx = x)
+
+y_predicted
+
+RMSE <- RMSE(y,y_predicted)
+RMSE
+
+R2 <- R2(y,y_predicted)
+R2
+
+#find SST and SSE
+#sst <- sum((y - mean(y))^2)
+#sse <- sum((y_predicted - y)^2)
+#sst
+#sse
+#find R-Squared
+#rsq <- 1-sse/sst
+#rsq
+
+```
+
+## 5.2)SVM Wrt State,Age grp,Year Culminated Model
+
+```{r}
+library(e1071)
+set.seed(123)
+train_samples <- modelsvm$Total %>%
+  createDataPartition(p=0.80,list=FALSE)
+
+train <- modelsvm[train_samples,]
+test <- modelsvm[-train_samples,]
+#agedf
+
+# MLR Model creation
+modelsvm <- svm(Total~Year+Age_group+State,data=train, kernel = 'linear')
+summary(modelsvm)
+
+#Make predictions
+pred <- modelsvm %>%predict(test)
+pred
+
+#Verification with actual value and predicted values
+RMSE <- RMSE(pred,test$Total)
+RMSE
+
+R2 <- R2(pred,test$Total)
+R2
+
+```
+
+
+## 5.3)LOGISTIC REGRESSION State,Age grp,Year Culminated Model
+```{r}
+##BIG MODEL LOGISTIC REGRESSION
+# Splitting dataset
+set.seed(123)
+train_samplesbm <- modelLog$Year %>% createDataPartition(p=0.65,list=FALSE)
+#train_samples
+head(train_samplesbm)
+train <- modelLog[train_samplesbm,]
+test <- modelLog[-train_samplesbm,]
+#train
+#test
+
+as.factor(modelLog$Total)
+
+# Training model
+logistic_modelbm <- glm(Total~Year+Age_group+State, data = train)
+logistic_modelbm 
+pred <- logistic_modelbm %>%
+  predict(test)
+pred
+RMSE <- RMSE(pred,test$Total)
+RMSE
+R2 <- R2(pred,test$Total)
+R2
+#test
+```
+
+## 5.4)Wrt State,Age grp,Year Culminated Model MLR
+```{r}
+#Testing co relation
+#cor(suicide_count_overyears$Year,suicide_count_overyears$total_case)
+#cor.test(suicide_count_overyears$Year,suicide_count_overyears$total_case)
+
+#Partitioning into train and test
+set.seed(123)
+train_samples <- model$Total %>%
+  createDataPartition(p=0.80,list=FALSE)
+train <- model[train_samples,]
+test <- model[-train_samples,]
+
+#agedf
+
+# MLR Model creation
+model <- lm(Total~Year+Age_group+State,data=train)
+summary(model)
+
+#Make predictions
+pred <- model %>%
+  predict(test)
+
+pred
+
+#Verification with actual value and predicted values
+RMSE <- RMSE(pred,test$Total)
+RMSE
+
+R2 <- R2(pred,test$Total)
+R2
+
+hist(model$residuals)
+qqnorm(model$residuals,ylab = "Residuals")
+qqline(model$residuals)
+
+# Prediction
+new.speeds <- data.frame(
+  Year = c(2013, 2013, 2013,2022,2023,2024) , Age_group = c("30-44","45-59","0-14","15-29","60+","30-44") ,State=c("Maharashtra","West Bengal","Andhra Pradesh","Andhra Pradesh","Maharashtra","West Bengal")
+)
+#(agedf)
+predict(model, newdata = new.speeds)
+
+```
