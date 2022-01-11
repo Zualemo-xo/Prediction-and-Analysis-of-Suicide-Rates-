@@ -10,7 +10,7 @@ Download the repository and extract it.
 <br>
 Open 'ui.R' and 'server.r' in your local Rstudio application. A 'Run App' option will be displayed. Click on that to execute the shiny dashboard.
 
-## Data Sources
+## Data Source
 
 Link: https://www.kaggle.com/rajanand/suicides-in-india
 
@@ -51,6 +51,17 @@ Logistic regression is a statistical analysis approach for predicting a data val
 
 ![image](https://user-images.githubusercontent.com/65520755/149009157-d7014ad6-7e35-4562-b9c5-855df382c81a.png)
 
+# Snippets of the Shiny Dashboard
+
+![image](https://user-images.githubusercontent.com/61049979/149012752-e079f6b1-56c5-40ef-bdd1-92e1cfa4ad1e.png)
+
+![image](https://user-images.githubusercontent.com/61049979/149012788-835e1ab3-20a5-43f0-b157-b1fee70d7a50.png)
+
+![image](https://user-images.githubusercontent.com/61049979/149012838-a80fc1bc-75de-4697-bcea-94fe0e6ee904.png)
+
+![image](https://user-images.githubusercontent.com/61049979/149012877-62d84d83-e89e-427f-8f05-c31df883e54d.png)
+
+![image](https://user-images.githubusercontent.com/61049979/149013165-bc518327-923d-48f8-af7c-154648ee6da8.png)
 
 
 # Conclusion 
