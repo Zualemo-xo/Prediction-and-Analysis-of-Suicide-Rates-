@@ -54,7 +54,7 @@ meansdf=filter(df2,df2$Type_code=="Means_adopted")
 professionaldf=filter(df2,df2$Type_code=="Professional_Profile")
 socialdf=filter(df2,df2$Type_code=="Social_Status")
 
-load("model1.Rdata")
+load("model2.Rdata")
 summary(model)
 shinyServer(function(input,output){
 
