@@ -3,7 +3,8 @@
 # R code to install packages if not already installed
 #
 
-my_packages = c("plotly", "DT","shiny","tidyverse","caret","dplyr","ggplot2","plotly","treemapify","stringr","ggthemes","plotrix")
+
+my_packages = c("plotly", "DT","shiny","tidyverse","caret","dplyr","ggplot2","plotly","treemapify","stringr","ggthemes","plotrix","shinythemes","data.table","shinydashboard")
 
 install_if_missing = function(p) {
   if (p %in% rownames(installed.packages()) == FALSE) {
