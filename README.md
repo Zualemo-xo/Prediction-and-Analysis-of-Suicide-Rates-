@@ -1,7 +1,12 @@
 # Prediction-and-Analysis-of-Suicide-Rates-
 
+In this digital age, the pressure to perform and succeed can often lead to depression and, in extreme cases, death. Suicide is defined as the deliberate act of causing one's death. They are increasing at an alarming rate all over the world, and it is important to reduce the number of suicides taking place. Suicide attempts have serious emotional, physical, and financial ramifications. Although a single factor cannot be pinpointed, among the common factors leading towards taking the extreme step, some of them can be analyzed through this project. A visualization of these could give us a better understanding of the causes of their suicide. A prediction plot of the overall rate of suicides in the future years is found using regression algorithms. A culminated model was created to predict the total count of suicide based on various factors including state, age group, and Year. These results would be helpful to reduce the number of suicide rates in the world and create awareness among people. The ‘R’ language was used to perform data analytics
 
-In this digital age, the pressure to perform and succeed can often lead to depression and, in extreme cases, death. Suicide is defined as the deliberate act of causing one's death. They are increasing at an alarming rate all over the world, and it is important to reduce the number of suicides taking place. Suicide attempts have serious emotional, physical, and financial ramifications. People who attempt suicide and live may have serious injuries that have long-term health repercussions. People who attempt suicide and live may have serious injuries that have long-term health repercussions. It's a serious public health problem that can be avoided with timely, evidence-based, and usually low-cost treatments. A multisectoral suicide prevention plan is required for nationwide responses to be effective. An integrated system to perform suicide analysis is needed. Although a single factor cannot be pinpointed, among the common factors leading towards taking the extreme step, some of them can be analyzed through this project. A visualization of these could give us a better understanding of the causes of their suicide. A prediction plot of the overall rate of suicides in the future years is found using regression algorithms. A culminated model was created to predict the total count of suicide based on various factors including state, age group, and Year. These results would be helpful to reduce the number of suicide rates in the world and create awareness among people. The ‘R’ language was used to perform data analytics
+
+# Machine Learning
+
+
+# Proposed System
 
 
 
