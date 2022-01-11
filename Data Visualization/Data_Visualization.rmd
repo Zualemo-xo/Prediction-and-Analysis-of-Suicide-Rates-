@@ -280,34 +280,3 @@ ma_type%>%ggplot(aes(x=Type,y=mtot,fill=Age_group))+geom_bar(stat="identity",
                                                         position="stack")+scale_fill_manual(values=colr)+theme(legend.position = "bottom",axis.text.x = element_text(angle=90))+labs(x="Means Adopted",y="Count")
 
 ```
-
-
-```{r,echo=TRUE}
-
-```
-
-
-```{r,echo=TRUE}
-
-```
-
-
-```{r,echo=TRUE}
-
-```
-
-
-```{r,echo=TRUE}
-
-```
-
-
-```{r,echo=TRUE}
-
-```
-
-
-
-```{r,echo=TRUE}
-
-```
