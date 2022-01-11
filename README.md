@@ -2,28 +2,42 @@
 
 In this digital age, the pressure to perform and succeed can often lead to depression and, in extreme cases, death. Suicide is defined as the deliberate act of causing one's death. They are increasing at an alarming rate all over the world, and it is important to reduce the number of suicides taking place. Suicide attempts have serious emotional, physical, and financial ramifications. Although a single factor cannot be pinpointed, among the common factors leading towards taking the extreme step, some of them can be analyzed through this project. A visualization of these could give us a better understanding of the causes of their suicide. A prediction plot of the overall rate of suicides in the future years is found using regression algorithms. A culminated model was created to predict the total count of suicide based on various factors including state, age group, and Year. These results would be helpful to reduce the number of suicide rates in the world and create awareness among people. The ‘R’ language was used to perform data analytics
 
-## Data Sources
+# Data Sources
 
 Link: https://www.kaggle.com/rajanand/suicides-in-india
 
-## Language 
+# Language 
 R,R Markdown
 
-## Tools
-->R studio </br>
-->Plotly </br>
+# Tools
+->R studio
+->Plotly
 ->Ggplot 2
 
-## Techniques
-->Dataset Cleaning</br>
-->Data Visualization</br>
-->Data Analysis</br>
+# Techniques
+->Dataset Cleaning
+->Data Visualization
+->Data Analysis
 ->Machine Learning
 
-# Machine Learning
+# Proposed Methodology
+
+-> Support Vector Machine 
+The Support Vector Machine (SVM) is a supervised learning technology that is used to handle classification and regression issues. The SVM algorithm's goal is to identify the best line or decision boundary for dividing n-dimensional space into classes so that additional data points may be easily placed in the proper category in the future. A hyperplane, also called the best decision boundary.
+
+-> Linear Regression
+Linear regression is a supervised learning machine learning technique. It performs a regression task. Regression models provide a goal prediction value based on independent variables. It is mostly utilized in predicting and finding correlations between variables.
 
 
-# Proposed System
+-> Multi Linear Regression
+It is a statistical technique that uses multiple predictor variables to formulate a final target answer. This algorithm's purpose is to simulate the linear relationship between the independent and dependent variables
+
+-> Lasso Regression
+Logistic regression is a statistical analysis approach for predicting a data value based on previous data set observations. In the area of machine learning, logistic regression has become an important tool. The technique helps a machine learning application to classify incoming data using an algorithm based on historical data. 
+
+-> Logistic regression
+ It is a classification algorithm that uses shrinkage in simple models, including models with fewer parameters. During this procedure, the data values are shrunk towards a center point, similar to a mean.
+
 
 
 
