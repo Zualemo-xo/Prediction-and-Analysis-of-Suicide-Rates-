@@ -49,13 +49,12 @@ Logistic regression is a statistical analysis approach for predicting a data val
 
 # Conclusion :
 
--> Various machine learning models were implemented and arrived at the following conclusions by looking at the results and visualization. The number of suicide cases are escalating year by year. A cause of concern observed during data cleaning is that many suicides are unclassified. 
--> Males tend to end their lives as compared to females. 
--> People belonging to the age group of 15-44 constitute for most suicide cases. 
--> Maharashtra, Andhra Pradesh and West Bengal are the states having the most number of suicides in India. 
--> The major factors include family problems, prolonged illness, and insanity. 
--> Education is an essential factor in combating suicide, as with increase in education level, the suicide count drops. 
-<br>
+i) Various machine learning models were implemented and arrived at the following conclusions by looking at the results and visualization. The number of suicide cases are escalating year by year. A cause of concern observed during data cleaning is that many suicides are unclassified. <br>
+ii) Males tend to end their lives as compared to females. <br>
+ii) People belonging to the age group of 15-44 constitute for most suicide cases. <br>
+iv) Maharashtra, Andhra Pradesh and West Bengal are the states having the most number of suicides in India. <br>
+v) The major factors include family problems, prolonged illness, and insanity. <br>
+vi) Education is an essential factor in combating suicide, as with increase in education level, the suicide count drops. <br>
 
 The culminated machine learning model indicates that the suicide count varies based on state and age group, but the factor that remains constant is that the suicide count is predicted to go higher and higher every year. Hence immediate actions have to be taken to bring awareness to the general public about mental health issues, ensure that they stay in a healthy state of mind and are able to stay strong when faced with problems so that they never consider the act of suicide.
 
