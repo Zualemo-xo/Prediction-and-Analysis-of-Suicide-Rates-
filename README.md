@@ -1,4 +1,9 @@
 # Prediction-and-Analysis-of-Suicide-Rates
+# Steps to Run the Application
+
+Download the repository and extract it.
+<br>
+Open 'ui.R' and 'server.r' in your local Rstudio application. A 'Run App' option will be displayed. Click on that to execute the shiny dashboard.
 
 # Abstract and Scope of the Project
 
@@ -47,7 +52,7 @@ Logistic regression is a statistical analysis approach for predicting a data val
 
 
 
-# Conclusion :
+# Conclusion 
 
 i) Various machine learning models were implemented and arrived at the following conclusions by looking at the results and visualization. The number of suicide cases are escalating year by year. A cause of concern observed during data cleaning is that many suicides are unclassified. <br>
 ii) Males tend to end their lives as compared to females. <br>
