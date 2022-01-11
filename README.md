@@ -1,5 +1,5 @@
 # Prediction-and-Analysis-of-Suicide-Rates
-# Steps to Run the Application
+## Steps to Run the Application
 
 Download the repository and extract it.
 <br>
