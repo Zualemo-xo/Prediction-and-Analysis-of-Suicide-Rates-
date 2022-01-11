@@ -2,6 +2,23 @@
 
 In this digital age, the pressure to perform and succeed can often lead to depression and, in extreme cases, death. Suicide is defined as the deliberate act of causing one's death. They are increasing at an alarming rate all over the world, and it is important to reduce the number of suicides taking place. Suicide attempts have serious emotional, physical, and financial ramifications. Although a single factor cannot be pinpointed, among the common factors leading towards taking the extreme step, some of them can be analyzed through this project. A visualization of these could give us a better understanding of the causes of their suicide. A prediction plot of the overall rate of suicides in the future years is found using regression algorithms. A culminated model was created to predict the total count of suicide based on various factors including state, age group, and Year. These results would be helpful to reduce the number of suicide rates in the world and create awareness among people. The ‘R’ language was used to perform data analytics
 
+# Data Sources
+
+Link: https://www.kaggle.com/rajanand/suicides-in-india
+
+# Language 
+R,R Markdown
+
+# Tools
+->R studio
+->Plotly
+->Ggplot 2
+
+# Techniques
+->Dataset Cleaning
+->Data Visualization
+->Data Analysis
+->Machine Learning
 
 # Machine Learning
 
